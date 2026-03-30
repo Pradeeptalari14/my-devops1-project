@@ -13,22 +13,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    # ✅ Checkout code
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
+    # ✅ Build Docker image
     - name: Build Docker Image
       run: docker build -t myapp .
 
+    # ✅ Run Trivy scan (official action)
     - name: Run Trivy Scan
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: myapp
         exit-code: 0
+        severity: CRITICAL,HIGH
 
+    # ✅ Login to GitHub Container Registry
     - name: Login to GHCR
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Tag Image
+    # ✅ Tag image
+    - name: Tag Docker Image
       run: docker tag myapp ghcr.io/${{ github.repository }}:latest
 
-    - name: Push Image
+    # ✅ Push image
+    - name: Push Docker Image
       run: docker push ghcr.io/${{ github.repository }}:latest
